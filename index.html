@@ -44,11 +44,11 @@ body.touch .tb{border-radius:50%;width:88px;height:88px;border:4px solid #fff;co
 body.touch .tb svg{width:38px;height:38px;filter:drop-shadow(0 1px 1px #000)}
 body.touch .tb small{font-size:12px}
 body.touch .tb .ar{font-size:36px;line-height:1}
-body.touch .tb.punch{background:#ff7a00;width:104px;height:104px}
-body.touch .tb.kick{background:#9333ea;width:104px;height:104px}
+body.touch .tb.punch{background:#ff7a00;width:100px;height:100px}
+body.touch .tb.kick{background:#9333ea;width:100px;height:100px}
 body.touch .tb.steer{background:#2563eb}
 body.touch .tb.gas{background:#16a34a;width:100px;height:100px}
-body.touch .tb.brk{background:#dc2626;width:84px;height:84px;bottom:150px!important}
+body.touch .tb.brk{background:#dc2626;width:84px;height:84px;bottom:130px!important}
 body.touch .tb.on{background:#fff!important;color:#111;text-shadow:none;transform:scale(.94)}
 body.touch .tb.on svg{filter:none}
 @media (min-width:700px) and (min-height:600px){body.touch .tb{width:112px;height:112px}body.touch .tb.punch,body.touch .tb.kick{width:128px;height:128px}body.touch .tb.gas{width:124px;height:124px}body.touch .tb.brk{width:104px;height:104px}body.touch .tb svg{width:50px;height:50px}body.touch .tb small{font-size:15px}}
@@ -63,14 +63,14 @@ body.touch .tb.on svg{filter:none}
   <button id="snd" aria-label="Toggle sound">🔊</button>
 </div>
 <div id="touch">
-  <!-- LEFT: combat -->
-  <div class="tb atk punch" data-k="pl" style="left:16px;bottom:24px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M7 12a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v8a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8z"/><path d="M3 14h5v8H3z"/><path d="M13 9v7M18 9v7M23 10v6" stroke="#10131f" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><small>PUNCH</small></div>
-  <div class="tb atk kick" data-k="kr" style="left:136px;bottom:84px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M10 2h8l1 14 9 5a3 3 0 0 1-1 6H12a3 3 0 0 1-3-3z"/><path d="M2 8h5M1 13h6M3 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><small>KICK</small></div>
-  <!-- RIGHT: movement -->
-  <div class="tb steer" data-k="l" style="right:128px;bottom:24px"><span class="ar">◀</span></div>
-  <div class="tb steer" data-k="r" style="right:16px;bottom:24px"><span class="ar">▶</span></div>
-  <div class="tb gas" data-k="gas" style="right:16px;bottom:140px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 3l11 14h-7v12h-8V17H5z"/></svg><small>GAS</small></div>
-  <div class="tb brk" data-k="brk" style="right:128px;bottom:140px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 29L5 15h7V3h8v12h7z"/></svg><small>BRAKE</small></div>
+  <!-- LEFT thumb: steering + brake -->
+  <div class="tb steer" data-k="l" style="left:16px;bottom:24px"><span class="ar">◀</span></div>
+  <div class="tb steer" data-k="r" style="left:122px;bottom:24px"><span class="ar">▶</span></div>
+  <div class="tb brk" data-k="brk" style="left:70px;bottom:130px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 29L5 15h7V3h8v12h7z"/></svg><small>BRAKE</small></div>
+  <!-- RIGHT thumb: gas + attacks -->
+  <div class="tb gas" data-k="gas" style="right:16px;bottom:24px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 3l11 14h-7v12h-8V17H5z"/></svg><small>GAS</small></div>
+  <div class="tb atk kick" data-k="kr" style="right:134px;bottom:30px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M10 2h8l1 14 9 5a3 3 0 0 1-1 6H12a3 3 0 0 1-3-3z"/><path d="M2 8h5M1 13h6M3 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><small>KICK</small></div>
+  <div class="tb atk punch" data-k="pl" style="right:30px;bottom:138px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M7 12a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v8a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8z"/><path d="M3 14h5v8H3z"/><path d="M13 9v7M18 9v7M23 10v6" stroke="#10131f" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><small>PUNCH</small></div>
 </div>
 <div class="screen on" id="menu">
   <h1>HIGHWAY<br>RASH</h1>
