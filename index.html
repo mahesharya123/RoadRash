@@ -23,7 +23,7 @@ body.touch #hp{right:calc(var(--u)*.75 + 24px + env(safe-area-inset-right))}
 #spd i{font-style:normal;font-size:12px;opacity:.8;margin-left:4px}
 #spd .bar i{background:var(--gold)}
 #toast{position:absolute;top:30%;width:100%;text-align:center;font:italic 900 clamp(30px,7vw,64px) Impact,"Arial Black",sans-serif;color:var(--gold);text-shadow:3px 3px 0 #000;opacity:0;transition:opacity .25s}
-.screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:radial-gradient(ellipse at center,#0006,#000b);padding:20px}
+.screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:rgba(5,8,16,.9);padding:20px}
 .screen.on{display:flex}
 h1{margin:0;font:italic 900 clamp(46px,11vw,110px)/.9 Impact,"Arial Black",sans-serif;color:var(--ink);text-shadow:4px 4px 0 var(--hot),8px 8px 0 #000a}
 h2{margin:0 0 10px;font:italic 900 clamp(40px,9vw,84px) Impact,"Arial Black",sans-serif;color:var(--hot);text-shadow:3px 3px 0 #000}
@@ -60,7 +60,15 @@ body.touch #pausebtn{display:flex;align-items:center;justify-content:center}
   body.touch #hp{top:calc(max(12px,env(safe-area-inset-top)) + 64px);right:14px;left:14px;width:auto}
 }
 @media (max-height:420px){#spd{padding:3px 14px 5px}#spd b{font-size:30px}.stat{padding:5px 10px}.stat b{font-size:22px}}
+.screen{overflow-y:auto}
+#adbox{margin:16px 0 18px;text-align:center}
+#adbox:not(:empty)::before{content:"ADVERTISEMENT";display:block;font-size:10px;letter-spacing:1px;opacity:.6;margin-bottom:4px}
+#adbox ins{display:inline-block;width:300px;height:250px}
+@media (max-height:520px){#adbox ins{width:320px;height:50px}#adbox{margin:8px 0 12px}}
 </style>
+<!-- Google AdSense: script is loaded here, but the ad unit is only created on the game-over screen (see showAd in src/main.ts) -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-11903444047315asasd68"
+     crossorigin="anonymous"></script>
 </head>
 <body>
 <div id="hud">
@@ -90,6 +98,7 @@ body.touch #pausebtn{display:flex;align-items:center;justify-content:center}
 <div class="screen" id="over">
   <h2>WIPED OUT</h2>
   <p>Score <b id="fscore">0</b> · <span id="fdist">0</span> m · <span id="fko">0</span> knockouts<br>Best <b id="best">0</b></p>
+  <div id="adbox" data-slot="0000000000"></div>
   <button class="go" id="again">RIDE AGAIN</button>
 </div>
 <script type="module" src="/src/main.ts"></script>
