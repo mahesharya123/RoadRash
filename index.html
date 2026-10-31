@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>Highway Rash — 3D Motorcycle Combat Racing</title>
+<style>
+:root{--ink:#f4f0e6;--hot:#ff4d2e;--gold:#ffc83d;--panel:rgba(12,14,22,.72)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#0b0f1c;color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;touch-action:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+#hud{position:fixed;inset:0;pointer-events:none;padding:max(12px,env(safe-area-inset-top)) 14px 14px}
+.stat{position:absolute;top:max(12px,env(safe-area-inset-top));left:14px;background:var(--panel);padding:8px 14px;border-left:4px solid var(--hot);border-radius:4px}
+.stat b{display:block;font:italic 900 28px/1 Impact,"Arial Black",sans-serif;letter-spacing:.5px}
+.stat small{opacity:.75;font-size:12px}
+#hp{position:absolute;top:max(12px,env(safe-area-inset-top));right:14px;width:min(40vw,240px)}
+.bar{height:14px;background:rgba(0,0,0,.55);border:2px solid #fff3;border-radius:3px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff3b2e,#ffb02e 50%,#5bdc5b)}
+#riv i{background:#ff4d2e}#riv{opacity:0;transition:opacity .2s}
+#spd{position:absolute;left:50%;bottom:max(14px,env(safe-area-inset-bottom));transform:translateX(-50%);text-align:center;background:var(--panel);padding:6px 22px 8px;border-radius:6px;min-width:150px}
+#spd b{font:italic 900 40px/1 Impact,"Arial Black",sans-serif;color:var(--gold)}
+#spd i{font-style:normal;font-size:12px;opacity:.8;margin-left:4px}
+#spd .bar i{background:var(--gold)}
+#toast{position:absolute;top:30%;width:100%;text-align:center;font:italic 900 clamp(30px,7vw,64px) Impact,"Arial Black",sans-serif;color:var(--gold);text-shadow:3px 3px 0 #000;opacity:0;transition:opacity .25s}
+.screen{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:radial-gradient(ellipse at center,#0006,#000b);padding:20px}
+.screen.on{display:flex}
+h1{margin:0;font:italic 900 clamp(46px,11vw,110px)/.9 Impact,"Arial Black",sans-serif;color:var(--ink);text-shadow:4px 4px 0 var(--hot),8px 8px 0 #000a}
+h2{margin:0 0 10px;font:italic 900 clamp(40px,9vw,84px) Impact,"Arial Black",sans-serif;color:var(--hot);text-shadow:3px 3px 0 #000}
+p{margin:10px 0;max-width:520px;line-height:1.5}
+button.go{pointer-events:auto;margin-top:18px;font:italic 900 24px Impact,"Arial Black",sans-serif;padding:12px 38px;background:var(--hot);color:#fff;border:0;border-radius:4px;box-shadow:0 5px 0 #8a1f0d;cursor:pointer}
+button.go:active{transform:translateY(3px);box-shadow:0 2px 0 #8a1f0d}
+.keys{font-size:14px;opacity:.85}
+.keys kbd{background:#fff2;padding:2px 7px;border-radius:3px;border:1px solid #fff4}
+#touch{display:none;position:fixed;inset:0;pointer-events:none}
+body.touch #touch{display:block}body.touch .keys{display:none}
+.tb{position:absolute;pointer-events:auto;width:78px;height:78px;border-radius:50%;background:#10131fa8;border:3px solid #fff5;color:#fff;font:900 15px Impact,sans-serif;display:flex;align-items:center;justify-content:center;touch-action:none}
+.tb.on{background:var(--hot)}
+.tb{flex-direction:column;gap:2px}.tb svg{width:34px;height:34px}.tb small{font:900 11px Impact,sans-serif;letter-spacing:.5px}.tb .ar{font-size:30px}
+.tb.gas{width:90px;height:90px;background:#1d6b3aa8}.tb.brk{width:70px;height:70px;background:#7a1f1fa8}.tb.atk{background:#c2410ca8}.tb.on{background:var(--hot)!important}
+@media (min-width:700px){.tb{width:104px;height:104px}.tb.gas{width:120px;height:120px}.tb.brk{width:92px;height:92px}.tb svg{width:46px;height:46px}.tb small{font-size:14px}}
+#snd{position:absolute;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);pointer-events:auto;width:44px;height:44px;border-radius:50%;border:2px solid #fff4;background:var(--panel);font-size:20px;cursor:pointer;color:#fff}
+</style>
+</head>
+<body>
+<div id="hud">
+  <div class="stat"><b id="score">0</b><small><span id="dist">0</span> m · level <span id="lvl">1</span></small></div>
+  <div id="hp"><small>HEALTH</small><div class="bar"><i id="hpbar"></i></div><div class="bar" id="riv"><i id="rivbar"></i></div></div>
+  <div id="spd"><b id="kmh">0</b><i>km/h</i><div class="bar"><i id="spdbar" style="width:0"></i></div></div>
+  <div id="toast"></div>
+  <button id="snd" aria-label="Toggle sound">🔊</button>
+</div>
+<div id="touch">
+  <div class="tb" data-k="l" style="left:14px;bottom:110px"><span class="ar">◀</span></div>
+  <div class="tb" data-k="r" style="left:114px;bottom:110px"><span class="ar">▶</span></div>
+  <div class="tb brk" data-k="brk" style="right:124px;bottom:24px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 29L5 15h7V3h8v12h7z"/></svg><small>BRAKE</small></div>
+  <div class="tb gas" data-k="gas" style="right:14px;bottom:24px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 3l11 14h-7v12h-8V17H5z"/></svg><small>GAS</small></div>
+  <div class="tb atk" data-k="pl" style="right:124px;bottom:120px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M7 12a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v8a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8z"/><path d="M3 14h5v8H3z"/><path d="M13 9v7M18 9v7M23 10v6" stroke="#10131f" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><small>PUNCH</small></div>
+  <div class="tb atk" data-k="kr" style="right:14px;bottom:130px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M10 2h8l1 14 9 5a3 3 0 0 1-1 6H12a3 3 0 0 1-3-3z"/><path d="M2 8h5M1 13h6M3 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><small>KICK</small></div>
+</div>
+<div class="screen on" id="menu">
+  <h1>HIGHWAY<br>RASH</h1>
+  <p>Race through traffic, outrun the road gangs and knock rival bikers off their rides. Keep your health above zero.</p>
+  <p class="keys"><kbd>↑</kbd><kbd>↓</kbd> gas / brake · <kbd>←</kbd><kbd>→</kbd> steer · <kbd>Z</kbd> punch left · <kbd>X</kbd> kick right · <kbd>M</kbd> mute</p>
+  <button class="go" id="start">RIDE</button>
+</div>
+<div class="screen" id="over">
+  <h2>WIPED OUT</h2>
+  <p>Score <b id="fscore">0</b> · <span id="fdist">0</span> m · <span id="fko">0</span> knockouts<br>Best <b id="best">0</b></p>
+  <button class="go" id="again">RIDE AGAIN</button>
+</div>
+<script type="module" src="/src/main.ts"></script>
+</body>
+</html>
