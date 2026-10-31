@@ -262,6 +262,7 @@ function stopMusic() { musicOn = false; clearInterval(mTimer); }
 
 // ---------- game state ----------
 type State = 'menu' | 'play' | 'over';
+let joy = 0, paused = false;
 let state: State = 'menu', level = 1, shake = 0, crashT = 0, kos = 0, toastT = 0;
 const p = { x: 0, z: 0, v: 0, vx: 0, hp: 100, score: 0, dist: 0, inv: 0, cd: 0, atkSide: 0, atkT: 0, crashed: false };
 const player = makeBike(0xe02020, 0x1a1a1a); scene.add(player.g);
@@ -293,7 +294,7 @@ function reset() {
 }
 function toast(t: string) { const el = $('toast'); el.textContent = t; el.style.opacity = '1'; toastT = 1.4; }
 function start() {
-  initAudio(); reset(); state = 'play';
+  initAudio(); reset(); state = 'play'; paused = false; clearInputs(); $('pause').classList.remove('on');
   $('menu').classList.remove('on'); $('over').classList.remove('on'); toast('GO!'); sfx.go(); stopMusic(); startMusic();
 }
 $('start').addEventListener('click', start);
@@ -302,7 +303,7 @@ $('again').addEventListener('click', start);
 // ---------- input ----------
 const keys: Record<string, boolean> = {}, tc: Record<string, boolean> = {};
 function attack(side: -1 | 1) {
-  if (state !== 'play' || p.crashed || p.atkT > 0) return;
+  if (state !== 'play' || paused || p.crashed || p.atkT > 0) return;
   p.atkSide = side; p.atkT = 0.3; p.cd = 0.1;
   let hit = false;
   for (const e of ents) {
@@ -322,18 +323,44 @@ addEventListener('keydown', (e) => {
   if ((e.code === 'Enter' || e.code === 'Space') && state !== 'play' && (e.target as HTMLElement).tagName !== 'BUTTON') start();
   if (['KeyZ', 'KeyQ', 'KeyJ'].includes(e.code)) attack(-1);
   if (['KeyX', 'KeyE', 'KeyK'].includes(e.code)) attack(1);
+  if (e.code === 'KeyP' || e.code === 'Escape') setPause(!paused);
   if (e.code === 'KeyM') { setMute(!muted); toast(muted ? 'MUTED' : 'SOUND ON'); }
 });
-const unlock = () => { initAudio(); if (ac && ac.state !== 'running') void ac.resume(); };
+const unlock = () => { initAudio(); if (ac && !paused && ac.state !== 'running') void ac.resume(); };
 addEventListener('pointerdown', unlock); addEventListener('touchend', unlock);
 $('snd').addEventListener('click', (ev) => { ev.stopPropagation(); unlock(); setMute(!muted); });
 addEventListener('keyup', (e) => (keys[e.code] = false));
+const joyEl = $('joy'), knobEl = $('knob'); let joyId = -1;
+const ENDS = ['pointerup', 'pointercancel', 'lostpointercapture'];
+function joyMove(ev: PointerEvent) {
+  const r = joyEl.getBoundingClientRect(), max = r.width * 0.3;
+  let dx = ev.clientX - (r.left + r.width / 2), dy = ev.clientY - (r.top + r.height / 2); const m = Math.hypot(dx, dy);
+  if (m > max) { dx *= max / m; dy *= max / m; }
+  knobEl.style.transform = `translate(${dx}px,${dy}px)`;
+  const n = dx / max; joy = Math.abs(n) < 0.12 ? 0 : (Math.sign(n) * (Math.abs(n) - 0.12)) / 0.88; // dead zone + analog steer
+}
+joyEl.addEventListener('pointerdown', (ev) => { ev.preventDefault(); if (paused || joyId !== -1) return; joyId = ev.pointerId; try { joyEl.setPointerCapture(joyId); } catch { /* synthetic pointer */ } joyMove(ev); });
+joyEl.addEventListener('pointermove', (ev) => { if (ev.pointerId === joyId) joyMove(ev); });
+for (const t of ENDS) joyEl.addEventListener(t, ((ev: PointerEvent) => { if (ev.pointerId !== joyId) return; joyId = -1; joy = 0; knobEl.style.transform = ''; }) as EventListener);
 document.querySelectorAll<HTMLElement>('.tb').forEach((b) => {
-  const k = b.dataset.k!;
-  b.addEventListener('pointerdown', (ev) => { ev.preventDefault(); b.setPointerCapture(ev.pointerId); tc[k] = true; b.classList.add('on'); if (k === 'pl') attack(-1); if (k === 'kr') attack(1); });
-  const up = () => { tc[k] = false; b.classList.remove('on'); };
-  b.addEventListener('pointerup', up); b.addEventListener('pointercancel', up);
+  const k = b.dataset.k!; let id = -1;
+  b.addEventListener('pointerdown', (ev) => { ev.preventDefault(); if (paused || id !== -1) return; id = ev.pointerId; try { b.setPointerCapture(id); } catch { /* synthetic pointer */ } tc[k] = true; b.classList.add('on'); if (k === 'pl') attack(-1); if (k === 'kr') attack(1); });
+  for (const t of ENDS) b.addEventListener(t, ((ev: PointerEvent) => { if (ev.pointerId !== id) return; id = -1; tc[k] = false; b.classList.remove('on'); }) as EventListener);
 });
+function clearInputs() {
+  for (const k in keys) keys[k] = false; for (const k in tc) tc[k] = false;
+  joy = 0; joyId = -1; knobEl.style.transform = ''; document.querySelectorAll('.tb.on').forEach((x) => x.classList.remove('on'));
+}
+function setPause(v: boolean) {
+  if (v === paused || (v && state !== 'play')) return;
+  paused = v; $('pause').classList.toggle('on', v); clearInputs();
+  if (ac) void (v ? ac.suspend() : ac.resume());
+}
+$('pausebtn').addEventListener('click', () => setPause(!paused));
+$('resume').addEventListener('click', () => setPause(false));
+$('restart').addEventListener('click', () => { setPause(false); start(); });
+addEventListener('blur', () => setPause(true));
+document.addEventListener('visibilitychange', () => { if (document.hidden) setPause(true); });
 addEventListener('contextmenu', (e) => e.preventDefault());
 
 // ---------- gameplay ----------
@@ -393,7 +420,8 @@ function updateEntities(dt: number, playing: boolean) {
 }
 function update(dt: number) {
   const playing = state === 'play';
-  const steer = (keys.ArrowRight || keys.KeyD || tc.r ? 1 : 0) - (keys.ArrowLeft || keys.KeyA || tc.l ? 1 : 0);
+  if (tc.pl) attack(-1); if (tc.kr) attack(1); // held touch buttons repeat
+  const steer = clamp((keys.ArrowRight || keys.KeyD ? 1 : 0) - (keys.ArrowLeft || keys.KeyA ? 1 : 0) + joy, -1, 1);
   const gas = keys.ArrowUp || keys.KeyW || tc.gas, brk = keys.ArrowDown || keys.KeyS || tc.brk;
   const vmax = 56 + level * 2;
   p.inv = Math.max(0, p.inv - dt); p.atkT = Math.max(0, p.atkT - dt);
@@ -478,5 +506,5 @@ function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = i
 addEventListener('resize', resize); resize();
 reset(); camera.position.set(0, 3.1, 8); state = 'menu';
 let last = performance.now();
-renderer.setAnimationLoop((t) => { const dt = Math.min(0.05, (t - last) / 1000); last = t; update(dt); renderer.render(scene, camera); });
-(window as any).__game = { p, ents, get ac() { return ac; }, get music() { return musicOn; }, get state() { return state; }, start };
+renderer.setAnimationLoop((t) => { const dt = Math.min(0.05, (t - last) / 1000); last = t; if (!paused) update(dt); renderer.render(scene, camera); });
+(window as any).__game = { p, ents, get ac() { return ac; }, get music() { return musicOn; }, get joy() { return joy; }, get paused() { return paused; }, get muted() { return muted; }, get state() { return state; }, start };

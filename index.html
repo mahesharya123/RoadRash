@@ -10,10 +10,11 @@
 html,body{margin:0;height:100%;overflow:hidden;background:#0b0f1c;color:var(--ink);font-family:"Trebuchet MS","Segoe UI",system-ui,sans-serif;touch-action:none}
 canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
 #hud{position:fixed;inset:0;pointer-events:none;padding:max(12px,env(safe-area-inset-top)) 14px 14px}
-.stat{position:absolute;top:max(12px,env(safe-area-inset-top));left:14px;background:var(--panel);padding:8px 14px;border-left:4px solid var(--hot);border-radius:4px}
+.stat{position:absolute;top:max(12px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));background:var(--panel);padding:8px 14px;border-left:4px solid var(--hot);border-radius:4px}
 .stat b{display:block;font:italic 900 28px/1 Impact,"Arial Black",sans-serif;letter-spacing:.5px}
 .stat small{opacity:.75;font-size:12px}
 #hp{position:absolute;top:max(12px,env(safe-area-inset-top));right:14px;width:min(40vw,240px)}
+body.touch #hp{right:calc(var(--u)*.75 + 24px + env(safe-area-inset-right))}
 .bar{height:14px;background:rgba(0,0,0,.55);border:2px solid #fff3;border-radius:3px;overflow:hidden;margin-top:4px}
 .bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff3b2e,#ffb02e 50%,#5bdc5b)}
 #riv i{background:#ff4d2e}#riv{opacity:0;transition:opacity .2s}
@@ -33,25 +34,32 @@ button.go:active{transform:translateY(3px);box-shadow:0 2px 0 #8a1f0d}
 .keys kbd{background:#fff2;padding:2px 7px;border-radius:3px;border:1px solid #fff4}
 #touch{display:none;position:fixed;inset:0;pointer-events:none}
 body.touch #touch{display:block}body.touch .keys{display:none}
-.tb{position:absolute;pointer-events:auto;width:78px;height:78px;border-radius:50%;background:#10131fa8;border:3px solid #fff5;color:#fff;font:900 15px Impact,sans-serif;display:flex;align-items:center;justify-content:center;touch-action:none}
-.tb.on{background:var(--hot)}
-.tb{flex-direction:column;gap:2px}.tb svg{width:34px;height:34px}.tb small{font:900 11px Impact,sans-serif;letter-spacing:.5px}.tb .ar{font-size:30px}
-.tb.gas{width:90px;height:90px;background:#1d6b3aa8}.tb.brk{width:70px;height:70px;background:#7a1f1fa8}.tb.atk{background:#c2410ca8}.tb.on{background:var(--hot)!important}
-@media (min-width:700px){.tb{width:104px;height:104px}.tb.gas{width:120px;height:120px}.tb.brk{width:92px;height:92px}.tb svg{width:46px;height:46px}.tb small{font-size:14px}}
 #snd{position:absolute;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);pointer-events:auto;width:44px;height:44px;border-radius:50%;border:2px solid #fff4;background:var(--panel);font-size:20px;cursor:pointer;color:#fff}
-/* mobile controls: circular, high-contrast. Left = combat, right = movement */
-body.touch .tb{border-radius:50%;width:88px;height:88px;border:4px solid #fff;color:#fff;opacity:.92;box-shadow:0 4px 0 #0008,0 0 0 3px #0006;text-shadow:0 1px 2px #000}
-body.touch .tb svg{width:38px;height:38px;filter:drop-shadow(0 1px 1px #000)}
-body.touch .tb small{font-size:12px}
-body.touch .tb .ar{font-size:36px;line-height:1}
-body.touch .tb.punch{background:#ff7a00;width:92px;height:92px}
-body.touch .tb.kick{background:#9333ea;width:92px;height:92px}
-body.touch .tb.steer{background:#2563eb}
-body.touch .tb.gas{background:#16a34a;width:108px;height:108px}
-body.touch .tb.brk{background:#dc2626;width:88px;height:88px}
-body.touch .tb.on{background:#fff!important;color:#111;text-shadow:none;transform:scale(.94)}
-body.touch .tb.on svg{filter:none}
-@media (min-width:700px) and (min-height:600px){body.touch .tb{width:112px;height:112px}body.touch .tb.punch,body.touch .tb.kick{width:128px;height:128px}body.touch .tb.gas{width:124px;height:124px}body.touch .tb.brk{width:104px;height:104px}body.touch .tb svg{width:50px;height:50px}body.touch .tb small{font-size:15px}}
+
+/* ---- touch controls: sized from --u so they scale with the screen ---- */
+:root{--u:clamp(54px,min(17vh,12vw),92px);--g:14px;--sl:env(safe-area-inset-left,0px);--sr:env(safe-area-inset-right,0px);--sb:env(safe-area-inset-bottom,0px)}
+#pausebtn,body.touch #joy,body.touch .tb{touch-action:none}
+#pausebtn{display:none;position:absolute;top:max(12px,env(safe-area-inset-top));right:calc(14px + var(--sr));width:calc(var(--u)*.75);height:calc(var(--u)*.75);min-width:44px;min-height:44px;border-radius:50%;border:2px solid #fff6;background:var(--panel);color:#fff;pointer-events:auto;padding:0}
+#pausebtn svg{width:50%;height:50%}
+body.touch #pausebtn{display:flex;align-items:center;justify-content:center}
+#joy{position:absolute;left:calc(var(--g) + var(--sl));bottom:calc(var(--g) + var(--sb));width:calc(var(--u)*2.4);height:calc(var(--u)*2.4);pointer-events:auto;border-radius:50%}
+#joy::before{content:"";position:absolute;inset:calc(var(--u)*.2);border-radius:50%;background:radial-gradient(circle,#ffffff14,#10131fb0);border:3px solid #fff7;box-shadow:0 0 0 2px #0005}
+#joy::after{content:"◀      ▶";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;white-space:pre;font-size:calc(var(--u)*.26);color:#fff9;pointer-events:none}
+#knob{position:absolute;left:50%;top:50%;width:calc(var(--u)*.95);height:calc(var(--u)*.95);margin:calc(var(--u)*-.475) 0 0 calc(var(--u)*-.475);border-radius:50%;background:radial-gradient(circle at 35% 30%,#7fb0ff,#2563eb);border:3px solid #fff;box-shadow:0 4px 8px #0008;pointer-events:none}
+.tb{position:absolute;pointer-events:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:50%;color:#fff;border:3px solid #fff;opacity:.9;box-shadow:0 4px 0 #0008;font:900 11px Impact,sans-serif;text-shadow:0 1px 2px #000;transition:transform .05s}
+.tb svg{width:42%;height:42%;filter:drop-shadow(0 1px 1px #000)}
+.tb small{font-size:clamp(9px,calc(var(--u)*.15),13px);letter-spacing:.4px}
+.tb.on{background:#fff!important;color:#111;text-shadow:none;transform:scale(.93)}.tb.on svg{filter:none}
+.tb.gas{background:#16a34a;width:calc(var(--u)*1.5);height:calc(var(--u)*1.5);right:calc(var(--g) + var(--sr));bottom:calc(var(--g) + var(--sb))}
+.tb.brk{background:#dc2626;width:var(--u);height:var(--u);right:calc(var(--g)*2 + var(--sr) + var(--u)*1.5);bottom:calc(var(--g) + var(--sb))}
+.tb.atk{width:calc(var(--u)*.88);height:calc(var(--u)*.88);bottom:calc(var(--g)*2 + var(--sb) + var(--u)*1.5)}
+.tb.kick{background:#9333ea;right:calc(var(--g) + var(--sr) + var(--u)*.31)}
+.tb.punch{background:#ff7a00;right:calc(var(--g)*2 + var(--sr) + var(--u)*1.19)}
+@media (orientation:portrait){
+  #spd{bottom:auto;top:calc(max(12px,env(safe-area-inset-top)) + 116px);min-width:130px;padding:3px 18px 5px}#spd b{font-size:32px}
+  body.touch #hp{top:calc(max(12px,env(safe-area-inset-top)) + 64px);right:14px;left:14px;width:auto}
+}
+@media (max-height:420px){#spd{padding:3px 14px 5px}#spd b{font-size:30px}.stat{padding:5px 10px}.stat b{font-size:22px}}
 </style>
 </head>
 <body>
@@ -60,23 +68,26 @@ body.touch .tb.on svg{filter:none}
   <div id="hp"><small>HEALTH</small><div class="bar"><i id="hpbar"></i></div><div class="bar" id="riv"><i id="rivbar"></i></div></div>
   <div id="spd"><b id="kmh">0</b><i>km/h</i><div class="bar"><i id="spdbar" style="width:0"></i></div></div>
   <div id="toast"></div>
+  <button id="pausebtn" aria-label="Pause"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg></button>
   <button id="snd" aria-label="Toggle sound">🔊</button>
 </div>
 <div id="touch">
-  <!-- LEFT thumb: steering (bottom row) + punch/kick (row above) -->
-  <div class="tb steer" data-k="l" style="left:16px;bottom:18px"><span class="ar">◀</span></div>
-  <div class="tb steer" data-k="r" style="left:118px;bottom:18px"><span class="ar">▶</span></div>
-  <div class="tb atk punch" data-k="pl" style="left:16px;bottom:122px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M7 12a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v8a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8z"/><path d="M3 14h5v8H3z"/><path d="M13 9v7M18 9v7M23 10v6" stroke="#10131f" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><small>PUNCH</small></div>
-  <div class="tb atk kick" data-k="kr" style="left:118px;bottom:122px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M10 2h8l1 14 9 5a3 3 0 0 1-1 6H12a3 3 0 0 1-3-3z"/><path d="M2 8h5M1 13h6M3 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><small>KICK</small></div>
-  <!-- RIGHT thumb: gas + brake -->
-  <div class="tb gas" data-k="gas" style="right:16px;bottom:24px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 3l11 14h-7v12h-8V17H5z"/></svg><small>GAS</small></div>
-  <div class="tb brk" data-k="brk" style="right:142px;bottom:30px"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 29L5 15h7V3h8v12h7z"/></svg><small>BRAKE</small></div>
+  <div id="joy" aria-label="Steering joystick"><div id="knob"></div></div>
+  <div class="tb atk punch" data-k="pl"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M7 12a3 3 0 0 1 3-3h14a3 3 0 0 1 3 3v8a8 8 0 0 1-8 8h-4a8 8 0 0 1-8-8z"/><path d="M3 14h5v8H3z"/><path d="M13 9v7M18 9v7M23 10v6" stroke="#10131f" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg><small>PUNCH</small></div>
+  <div class="tb atk kick" data-k="kr"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M10 2h8l1 14 9 5a3 3 0 0 1-1 6H12a3 3 0 0 1-3-3z"/><path d="M2 8h5M1 13h6M3 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><small>KICK</small></div>
+  <div class="tb brk" data-k="brk"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 29L5 15h7V3h8v12h7z"/></svg><small>BRAKE</small></div>
+  <div class="tb gas" data-k="gas"><svg viewBox="0 0 32 32" fill="currentColor"><path d="M16 3l11 14h-7v12h-8V17H5z"/></svg><small>GAS</small></div>
 </div>
 <div class="screen on" id="menu">
   <h1>HIGHWAY<br>RASH</h1>
   <p>Race through traffic, outrun the road gangs and knock rival bikers off their rides. Keep your health above zero.</p>
   <p class="keys"><kbd>↑</kbd><kbd>↓</kbd> gas / brake · <kbd>←</kbd><kbd>→</kbd> steer · <kbd>Z</kbd> punch left · <kbd>X</kbd> kick right · <kbd>M</kbd> mute</p>
   <button class="go" id="start">RIDE</button>
+</div>
+<div class="screen" id="pause">
+  <h2>PAUSED</h2>
+  <button class="go" id="resume">RESUME</button>
+  <button class="go" id="restart" style="background:#334">RESTART</button>
 </div>
 <div class="screen" id="over">
   <h2>WIPED OUT</h2>
